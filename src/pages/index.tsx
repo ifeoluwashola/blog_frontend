@@ -1,6 +1,7 @@
 import { usePosts } from "@/hooks/usePosts";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import LikeComment from "@/components/LikeComment"; // ✅ Import the new component
 
 export default function Home() {
   const { token, clearToken } = useAuth();
@@ -11,20 +12,14 @@ export default function Home() {
 
   return (
     <div className="max-w-2xl mx-auto py-10">
-        <div className="flex justify-between mb-6">
+      <div className="flex justify-between mb-6">
         {!token ? (
           <>
-            <Link href="/login" className="px-4 py-2 bg-blue-500 text-white rounded">
-              Login
-            </Link>
-            <Link href="/signup" className="px-4 py-2 bg-green-500 text-white rounded">
-              Signup
-            </Link>
+            <Link href="/login" className="px-4 py-2 bg-blue-500 text-white rounded">Login</Link>
+            <Link href="/signup" className="px-4 py-2 bg-green-500 text-white rounded">Signup</Link>
           </>
         ) : (
-          <button onClick={clearToken} className="px-4 py-2 bg-red-500 text-white rounded">
-            Logout
-          </button>
+          <button onClick={clearToken} className="px-4 py-2 bg-red-500 text-white rounded">Logout</button>
         )}
       </div>
 
@@ -37,9 +32,10 @@ export default function Home() {
             <div key={post.id} className="border p-4 rounded-lg shadow-md hover:shadow-lg transition">
               <h2 className="text-xl font-semibold">{post.title}</h2>
               <p className="text-gray-600">{post.content.substring(0, 100)}...</p>
-              <a href={`/blog/${post.id}`} className="text-blue-500 hover:underline">
-                Read More →
-              </a>
+              <a href={`/blog/${post.id}`} className="text-blue-500 hover:underline">Read More →</a>
+
+              {/* ✅ Use the LikeComment component */}
+              <LikeComment post={post} token={token} />
             </div>
           ))}
         </div>

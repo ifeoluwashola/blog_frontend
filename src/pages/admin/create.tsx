@@ -10,10 +10,13 @@ export default function CreatePost() {
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("DEBUG: Create Post button clicked!"); // ✅ Debugging
     setError("");
   
     try {
       const token = localStorage.getItem("token");
+      console.log("DEBUG: Retrieved Token:", token); // ✅ Debugging
+  
       if (!token) {
         setError("You are not logged in. Please log in.");
         return;
@@ -23,13 +26,12 @@ export default function CreatePost() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`, // ✅ Fix: Ensure Authorization token is included
+          "Authorization": `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          title,
-          content,
-        }),
+        body: JSON.stringify({ title, content }),
       });
+  
+      console.log("DEBUG: Create Post Response Status:", response.status); // ✅ Debugging
   
       if (response.status === 201) {
         router.push("/admin");
@@ -41,7 +43,8 @@ export default function CreatePost() {
       console.error("Error creating post:", err);
       setError("Something went wrong. Please try again.");
     }
-  };    
+  };
+      
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-lg shadow-lg">
