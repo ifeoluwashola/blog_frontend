@@ -1,44 +1,94 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// src/context/AuthContext.tsx
+import { createContext, useState, useEffect, ReactNode } from "react";
+import { useRouter } from "next/router";
+import { login, register, getCurrentUser, createAdmin } from "../lib/api";
 
 interface AuthContextType {
+  user: any;
   token: string | null;
-  setToken: (token: string | null) => void;
-  clearToken: () => void;
+  loginUser: (username: string, password: string) => Promise<boolean>;
+  registerUser: (username: string, password: string) => Promise<boolean>;
+  createAdminUser: (username: string, password: string, token: string) => Promise<boolean>;
+  logoutUser: () => void;
+  isAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<any>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const router = useRouter();
 
-  // ✅ Ensure localStorage is only accessed in the browser
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedToken = localStorage.getItem("token");
-      if (savedToken) {
-        setToken(savedToken);
-      }
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+      getCurrentUser(storedToken)
+        .then((userData) => {
+          setUser(userData);
+          setIsAdmin(userData.is_superuser);
+        })
+        .catch(() => logoutUser());
     }
   }, []);
 
-  const clearToken = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
+  const loginUser = async (username: string, password: string) => {
+    try {
+      const data = await login(username, password);
+      setToken(data.access_token);
+      localStorage.setItem("token", data.access_token);
+      const userInfo = await getCurrentUser(data.access_token);
+      setUser(userInfo);
+      setIsAdmin(userInfo.is_superuser);
+      if (userInfo.is_superuser) {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
+      return true
+    } catch (error) {
+      console.error("Login failed", error);
     }
+    return false
+  };
+
+  const registerUser = async (username: string, password: string) => {
+    try {
+      await register(username, password);
+      router.push("/login");
+      return true
+    } catch (error) {
+      console.error("Registration failed", error);
+    }
+    return false
+  };
+
+  const createAdminUser = async (username: string, password: string, token: string) => {
+    try {
+      await createAdmin(username, password, token);
+      console.log("Admin user created successfully"); // Debugging log
+      return true; // Indicate success
+    } catch (error) {
+      console.error("Admin creation failed", error);
+      return false; // Indicate failure
+    }
+  };
+
+  const logoutUser = () => {
+    setUser(null);
     setToken(null);
+    setIsAdmin(false);
+    localStorage.removeItem("token");
+    router.push("/");
   };
 
   return (
-    <AuthContext.Provider value={{ token, setToken, clearToken }}>
+    <AuthContext.Provider value={{ user, token, loginUser, registerUser, createAdminUser, logoutUser, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuthStore = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuthStore must be used within an AuthProvider");
-  }
-  return context;
-};
+export default AuthContext;
