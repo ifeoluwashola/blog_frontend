@@ -1,4 +1,4 @@
-FROM node:18.19 AS build
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN npm run test
 
 #production stage
 
-FROM node:18.19
+FROM node:18-alpine
 
 WORKDIR /app
 
