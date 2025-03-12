@@ -26,11 +26,17 @@ export const useAuth = () => {
       }
 
       return data;
-    } catch (error) {
-      console.error("Login failed:", error.message);
-      return null;
-    }
+    
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Login failed:", error.message);
+  } else {
+    console.error("Login failed:", error);
+  }
+  return null;
+}
+
+
   };
 
-  return { token, login, clearToken };
-};
+  return { token, login, clearToken };};
