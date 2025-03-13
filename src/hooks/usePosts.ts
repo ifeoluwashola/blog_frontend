@@ -28,7 +28,7 @@ export const useLikePost = () => {
 
             return response.json();
         },
-        onSuccess: () => queryClient.invalidateQueries(["posts"]), // ✅ Ensure likes update immediately
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }), // ✅ Ensure likes update immediately
     });
 };
 
@@ -58,10 +58,11 @@ export const useAddComment = () => {
             if (!response.ok) throw new Error(`Failed to add comment: ${response.statusText}`);
             return response.json();
         },
-        onSuccess: () => queryClient.invalidateQueries(["posts"]),
+        
+onSuccess: () => queryClient.invalidateQueries({ queryKey: ["posts"] }),
+
     });
 };
-
 
 
 
