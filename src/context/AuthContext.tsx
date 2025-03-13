@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       getCurrentUser(storedToken)
         .then((userData) => {
           setUser(userData);
-          setIsAdmin(userData.is_superuser);
+          setIsAdmin(userData.is_admin);
         })
         .catch(() => logoutUser());
     }
@@ -41,8 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem("token", data.access_token);
       const userInfo = await getCurrentUser(data.access_token);
       setUser(userInfo);
-      setIsAdmin(userInfo.is_superuser);
-      if (userInfo.is_superuser) {
+      setIsAdmin(userInfo.is_admin);
+      if (userInfo.is_admin) {
         router.push("/admin");
       } else {
         router.push("/");
